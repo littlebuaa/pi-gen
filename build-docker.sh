@@ -6,6 +6,8 @@ BUILD_OPTS="$*"
 
 DOCKER="docker"
 
+ARCH_ARG="--platform linux/arm/v7"
+
 if ! ${DOCKER} ps >/dev/null 2>&1; then
 	DOCKER="sudo docker"
 fi
@@ -48,7 +50,7 @@ fi
 CONTAINER_NAME=${CONTAINER_NAME:-pigen_work}
 CONTINUE=${CONTINUE:-0}
 PRESERVE_CONTAINER=${PRESERVE_CONTAINER:-0}
-PIGEN_DOCKER_OPTS=${PIGEN_DOCKER_OPTS:-""}  
+PIGEN_DOCKER_OPTS=${PIGEN_DOCKER_OPTS:-""}
 
 if [ -z "${IMG_NAME}" ]; then
 	echo "IMG_NAME not set in 'config'" 1>&2
@@ -81,14 +83,14 @@ case "$(uname -m)" in
     BASE_IMAGE=i386/debian:buster
     ;;
   *)
-    BASE_IMAGE=debian:buster
+    BASE_IMAGE=arm32v7/debian:buster
     ;;
 esac
-${DOCKER} build --build-arg BASE_IMAGE=${BASE_IMAGE} -t pi-gen "${DIR}"
+${DOCKER} build ${ARCH_ARG} --build-arg BASE_IMAGE=${BASE_IMAGE} -t pi-gen "${DIR}"
 
 if [ "${CONTAINER_EXISTS}" != "" ]; then
 	trap 'echo "got CTRL+C... please wait 5s" && ${DOCKER} stop -t 5 ${CONTAINER_NAME}_cont' SIGINT SIGTERM
-	time ${DOCKER} run --rm --privileged \
+	time ${DOCKER} run ${ARCH_ARG} --rm --privileged \
 		--cap-add=ALL \
 		-v /dev:/dev \
 		-v /lib/modules:/lib/modules \
@@ -103,7 +105,7 @@ if [ "${CONTAINER_EXISTS}" != "" ]; then
 	wait "$!"
 else
 	trap 'echo "got CTRL+C... please wait 5s" && ${DOCKER} stop -t 5 ${CONTAINER_NAME}' SIGINT SIGTERM
-	time ${DOCKER} run --name "${CONTAINER_NAME}" --privileged \
+	time ${DOCKER} run ${ARCH_ARG} --name "${CONTAINER_NAME}" --privileged \
 		--cap-add=ALL \
 		-v /dev:/dev \
 		-v /lib/modules:/lib/modules \
