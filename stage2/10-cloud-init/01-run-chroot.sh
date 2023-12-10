@@ -3,6 +3,16 @@
 # Disable dhcpcd - it has a conflict with cloud-init network config
 systemctl mask dhcpcd
 
+
+
+# Raspberry Pi OS default cloud data source is "NoCloud"
+cmdline_string="ds=nocloud;seedfrom=\/boot\/ "
+
+if ! grep -q "$cmdline_string" /boot/cmdline.txt ; then
+  sed -i "1 s/\$/ $cmdline_string/" /boot/cmdline.txt
+fi
+
+
 cat > /etc/cloud/cloud.cfg <<EOC
 # The top level settings are used as module
 # and system configuration.
