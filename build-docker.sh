@@ -79,7 +79,7 @@ BUILD_OPTS="$(echo "${BUILD_OPTS:-}" | sed -E 's@\-c\s?([^ ]+)@-c /config@')"
 
 # Check the arch of the machine we're running on. If it's 64-bit, use a 32-bit base image instead
 case "$(uname -m)" in
-  x86_64|aarch64)
+  x86_64)
     BASE_IMAGE=i386/debian:buster
     ;;
   *)
@@ -101,7 +101,7 @@ if [ "${CONTAINER_EXISTS}" != "" ]; then
 		pi-gen \
 		bash -e -o pipefail -c "dpkg-reconfigure qemu-user-static &&
 	cd /pi-gen; ./build.sh ${BUILD_OPTS} &&
-	rsync -av work/*/build.log deploy/" &
+	rsync -av work/build.log deploy/" &
 	wait "$!"
 else
 	trap 'echo "got CTRL+C... please wait 5s" && ${DOCKER} stop -t 5 ${CONTAINER_NAME}' SIGINT SIGTERM
@@ -115,7 +115,7 @@ else
 		pi-gen \
 		bash -e -o pipefail -c "dpkg-reconfigure qemu-user-static &&
 	cd /pi-gen; ./build.sh ${BUILD_OPTS} &&
-	rsync -av work/*/build.log deploy/" &
+	rsync -av work/build.log deploy/" &
 	wait "$!"
 fi
 
